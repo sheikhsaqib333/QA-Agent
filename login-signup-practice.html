@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Practice — Login &amp; Signup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1B1D21;
+    --panel: #24272C;
+    --panel-raised: #2C2F35;
+    --border: #383C43;
+    --text: #ECEDEE;
+    --text-muted: #9AA1AB;
+    --accent: #E8A33D;
+    --accent-dim: #B87F2C;
+    --success: #5FBF77;
+    --error: #E5595F;
+    --radius: 6px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 20% 10%, #24272c 0%, #1B1D21 55%);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .wrap { width: 100%; max-width: 400px; }
+  .brand {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  .brand .mark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .brand h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 4px 0 0;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 14px 0;
+    text-align: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+  }
+  .tab.active { color: var(--text); }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    left: 12px; right: 12px; bottom: -1px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+  }
+  .panel { padding: 24px; display: none; }
+  .panel.active { display: block; }
+  .field { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  input:focus {
+    border-color: var(--accent);
+  }
+  input.invalid {
+    border-color: var(--error);
+  }
+  .error-text {
+    display: none;
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .error-text.show { display: block; }
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .checkbox-row input { margin-top: 2px; }
+  button.submit {
+    width: 100%;
+    padding: 11px 0;
+    background: var(--accent);
+    color: #211705;
+    border: none;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.submit:hover { background: var(--accent-dim); }
+  button.submit:disabled {
+    background: var(--border);
+    color: var(--text-muted);
+    cursor: not-allowed;
+  }
+  .banner {
+    display: none;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .banner.show { display: block; }
+  .banner.success { background: rgba(95,191,119,0.12); color: var(--success); border: 1px solid rgba(95,191,119,0.3); }
+  .banner.error { background: rgba(229,89,95,0.12); color: var(--error); border: 1px solid rgba(229,89,95,0.3); }
+  .dashboard { padding: 32px 24px; text-align: center; }
+  .dashboard h2 { margin: 0 0 8px; }
+  .dashboard p { color: var(--text-muted); font-size: 14px; margin: 0 0 20px; }
+  button.logout {
+    background: var(--panel-raised);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .testdata {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: var(--panel-raised);
+    border: 1px dashed var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .testdata strong { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="mark">QA-PRACTICE-01</div>
+    <h1>Account access</h1>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-testid="tab-login" onclick="switchTab('login')">Log in</button>
+      <button class="tab" data-testid="tab-signup" onclick="switchTab('signup')">Sign up</button>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div class="panel active" id="panel-login">
+      <div id="login-view">
+        <div class="banner error" id="login-banner" data-testid="login-banner"></div>
+        <div class="field">
+          <label for="login-email">Email</label>
+          <input type="text" id="login-email" data-testid="login-email">
+          <div class="error-text" id="login-email-error" data-testid="login-email-error"></div>
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" data-testid="login-password">
+          <div class="error-text" id="login-password-error" data-testid="login-password-error"></div>
+        </div>
+        <button class="submit" data-testid="login-submit" onclick="handleLogin()">Log in</button>
+      </div>
+      <div id="dashboard-view" style="display:none">
+        <div class="dashboard">
+          <h2 data-testid="dashboard-welcome">Welcome back<span id="dash-name"></span></h2>
+          <p>You are logged in.</p>
+          <button class="logout" data-testid="logout-button" onclick="handleLogout()">Log out</button>
+        </div>
+      </div>
+      <div class="testdata">
+        <strong>Seeded test account</strong><br>
+        email: test@example.com<br>
+        password: Test1234<br>
+        (5 wrong attempts locks this account for the session)
+      </div>
+    </div>
+
+    <!-- SIGNUP PANEL -->
+    <div class="panel" id="panel-signup">
+      <div class="banner success" id="signup-banner" data-testid="signup-success"></div>
+      <div class="banner error" id="signup-error-banner" data-testid="signup-error-banner"></div>
+      <div class="field">
+        <label for="signup-fullname">Full name</label>
+        <input type="text" id="signup-fullname" data-testid="signup-fullname">
+        <div class="error-text" id="signup-fullname-error" data-testid="signup-fullname-error"></div>
+      </div>
+      <div class="field">
+        <label for="signup-email">Email</label>
+        <input type="text" id="signup-email" data-testid="signup-email">
+        <div class="error-text" id="signup-email-error" data-testid="signup-email-error"></div>
+      </div>
+      <div class="field">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" data-testid="signup-password">
+        <div class="error-text" id="signup-password-error" data-testid="signup-password-error"></div>
+      </div>
+      <div class="field">
+        <label for="signup-confirm-password">Confirm password</label>
+        <input type="password" id="signup-confirm-password" data-testid="signup-confirm-password">
+        <div class="error-text" id="signup-confirm-password-error" data-testid="signup-confirm-password-error"></div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="signup-terms" data-testid="signup-terms">
+        <label for="signup-terms" style="margin:0">I agree to the Terms of Service</label>
+      </div>
+      <button class="submit" data-testid="signup-submit" onclick="handleSignup()">Create account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- seed data ---
+function getUsers() {
+  const raw = localStorage.getItem('qa_practice_users');
+  if (!raw) {
+    const seeded = { "test@example.com": { name: "Test User", password: "Test1234" } };
+    localStorage.setItem('qa_practice_users', JSON.stringify(seeded));
+    return seeded;
+  }
+  return JSON.parse(raw);
+}
+function saveUsers(users) {
+  localStorage.setItem('qa_practice_users', JSON.stringify(users));
+}
+let failedAttempts = {}; // in-memory, resets on page reload
+
+function switchTab(name) {
+  document.getElementById('panel-login').classList.toggle('active', name === 'login');
+  document.getElementById('panel-signup').classList.toggle('active', name === 'signup');
+  document.querySelector('[data-testid="tab-login"]').classList.toggle('active', name === 'login');
+  document.querySelector('[data-testid="tab-signup"]').classList.toggle('active', name === 'signup');
+
+  // BUG-001 fix: clear stale field errors and banners whenever the user switches tabs
+  clearErrors('login');
+  clearErrors('signup');
+  document.getElementById('login-banner').classList.remove('show');
+  document.getElementById('signup-banner').classList.remove('show');
+  document.getElementById('signup-error-banner').classList.remove('show');
+}
+
+function clearErrors(prefix) {
+  document.querySelectorAll(`[id^="${prefix}"][id$="-error"]`).forEach(el => {
+    el.classList.remove('show'); el.textContent = '';
+  });
+  document.querySelectorAll(`#panel-${prefix} input`).forEach(el => el.classList.remove('invalid'));
+}
+
+function setFieldError(fieldId, message) {
+  const errEl = document.getElementById(fieldId + '-error');
+  const inputEl = document.getElementById(fieldId);
+  errEl.textContent = message;
+  errEl.classList.add('show');
+  inputEl.classList.add('invalid');
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function handleSignup() {
+  clearErrors('signup');
+  document.getElementById('signup-banner').classList.remove('show');
+  document.getElementById('signup-error-banner').classList.remove('show');
+
+  const name = document.getElementById('signup-fullname').value.trim();
+  const email = document.getElementById('signup-email').value.trim().toLowerCase();
+  const password = document.getElementById('signup-password').value;
+  const confirm = document.getElementById('signup-confirm-password').value;
+  const terms = document.getElementById('signup-terms').checked;
+  let valid = true;
+
+  if (name.length < 2) { setFieldError('signup-fullname', 'Enter your full name (at least 2 characters).'); valid = false; }
+  if (!isValidEmail(email)) { setFieldError('signup-email', 'Enter a valid email address.'); valid = false; }
+  if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+    setFieldError('signup-password', 'Password needs 8+ characters, with at least one letter and one number.');
+    valid = false;
+  }
+  if (confirm !== password) { setFieldError('signup-confirm-password', 'Passwords do not match.'); valid = false; }
+  if (!terms) {
+    document.getElementById('signup-error-banner').textContent = 'You must agree to the Terms of Service.';
+    document.getElementById('signup-error-banner').classList.add('show');
+    valid = false;
+  }
+  if (!valid) return;
+
+  const users = getUsers();
+  if (users[email]) {
+    document.getElementById('signup-error-banner').textContent = 'That email is already registered.';
+    document.getElementById('signup-error-banner').classList.add('show');
+    return;
+  }
+
+  users[email] = { name, password };
+  saveUsers(users);
+  document.getElementById('signup-banner').textContent = 'Account created! You can now log in.';
+  document.getElementById('signup-banner').classList.add('show');
+  document.getElementById('signup-fullname').value = '';
+  document.getElementById('signup-email').value = '';
+  document.getElementById('signup-password').value = '';
+  document.getElementById('signup-confirm-password').value = '';
+  document.getElementById('signup-terms').checked = false;
+}
+
+function handleLogin() {
+  clearErrors('login');
+  document.getElementById('login-banner').classList.remove('show');
+
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  let valid = true;
+
+  if (!email) { setFieldError('login-email', 'Email is required.'); valid = false; }
+  else if (!isValidEmail(email)) { setFieldError('login-email', 'Enter a valid email address.'); valid = false; }
+  if (!password) { setFieldError('login-password', 'Password is required.'); valid = false; }
+  if (!valid) return;
+
+  if ((failedAttempts[email] || 0) >= 5) {
+    document.getElementById('login-banner').textContent = 'Account locked after too many failed attempts. Reload the page to reset (practice-only behavior).';
+    document.getElementById('login-banner').classList.add('show');
+    return;
+  }
+
+  const users = getUsers();
+  const user = users[email];
+  if (!user || user.password !== password) {
+    failedAttempts[email] = (failedAttempts[email] || 0) + 1;
+    document.getElementById('login-banner').textContent = 'Invalid email or password.';
+    document.getElementById('login-banner').classList.add('show');
+    return;
+  }
+
+  failedAttempts[email] = 0;
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('dashboard-view').style.display = 'block';
+  document.getElementById('dash-name').textContent = ', ' + user.name;
+}
+
+function handleLogout() {
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('dashboard-view').style.display = 'none';
+  document.getElementById('login-view').style.display = 'block';
+}
+</script>
+</body>
+</html>
