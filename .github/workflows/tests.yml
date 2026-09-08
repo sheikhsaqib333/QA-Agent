@@ -1,0 +1,25 @@
+﻿name: Run Automated Tests
+
+on: push
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Get the code from GitHub
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install project dependencies
+        run: |
+          pip install pytest pytest-playwright
+          playwright install --with-deps
+
+      - name: Run the signup and login test suites
+        run: |
+          pytest test_real_site_signup_full_suite.py test_real_site_login_suite.py -v
